@@ -1,0 +1,48 @@
+************* Module app.auth
+app/auth.py:56:8: W0707: Consider explicitly re-raising using 'except JWTError as exc' and 'raise credentials_exception from exc' (raise-missing-from)
+************* Module app.test
+app/test.py:7:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.main
+app/main.py:17:0: C0304: Final newline missing (missing-final-newline)
+app/main.py:3:0: W0611: Unused User imported from app.models (unused-import)
+app/main.py:3:0: W0611: Unused Topic imported from app.models (unused-import)
+app/main.py:3:0: W0611: Unused Task imported from app.models (unused-import)
+************* Module app.routers.auth
+app/routers/auth.py:1:0: W0611: Unused status imported from fastapi (unused-import)
+************* Module app.routers.tasks
+app/routers/tasks.py:25:0: C0301: Line too long (141/120) (line-too-long)
+app/routers/tasks.py:32:0: R1711: Useless return at end of function or method (useless-return)
+app/routers/tasks.py:3:0: C0411: standard import "typing.List" should be placed before third party imports "fastapi.APIRouter", "sqlalchemy.orm.Session" (wrong-import-order)
+************* Module app.routers.recommend
+app/routers/recommend.py:12:0: C0301: Line too long (139/120) (line-too-long)
+app/routers/recommend.py:29:0: C0304: Final newline missing (missing-final-newline)
+app/routers/recommend.py:4:0: C0411: standard import "typing.List" should be placed before third party imports "fastapi.APIRouter", "sqlalchemy.orm.Session", "sqlalchemy.and_" (wrong-import-order)
+app/routers/recommend.py:5:0: C0411: standard import "random" should be placed before third party imports "fastapi.APIRouter", "sqlalchemy.orm.Session", "sqlalchemy.and_" (wrong-import-order)
+app/routers/recommend.py:1:0: W0611: Unused HTTPException imported from fastapi (unused-import)
+app/routers/recommend.py:3:0: W0611: Unused and_ imported from sqlalchemy (unused-import)
+************* Module app.routers.topics
+app/routers/topics.py:14:0: C0301: Line too long (123/120) (line-too-long)
+app/routers/topics.py:3:0: C0411: standard import "typing.List" should be placed before third party imports "fastapi.APIRouter", "sqlalchemy.orm.Session" (wrong-import-order)
+app/routers/topics.py:1:0: W0611: Unused HTTPException imported from fastapi (unused-import)
+************* Module app.models.task
+app/models/task.py:20:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.models.__init__
+app/models/__init__.py:3:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.models.topic
+app/models/topic.py:12:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.schemas.user
+app/schemas/user.py:2:0: C0411: standard import "typing.Optional" should be placed before third party import "pydantic.BaseModel" (wrong-import-order)
+************* Module app.schemas.task
+app/schemas/task.py:17:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.schemas.__init__
+app/schemas/__init__.py:4:0: C0304: Final newline missing (missing-final-newline)
+************* Module app.schemas.recommend
+app/schemas/recommend.py:10:0: C0304: Final newline missing (missing-final-newline)
+app/schemas/recommend.py:2:0: C0411: standard import "typing.List" should be placed before third party import "pydantic.BaseModel" (wrong-import-order)
+************* Module app.schemas.topic
+app/schemas/topic.py:15:0: C0304: Final newline missing (missing-final-newline)
+app/schemas/topic.py:2:0: C0411: standard import "typing.Optional" should be placed before third party import "pydantic.BaseModel" (wrong-import-order)
+
+------------------------------------------------------------------
+Your code has been rated at 8.97/10 (previous run: 9.10/10, -0.13)
+
