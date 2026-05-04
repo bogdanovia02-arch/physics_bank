@@ -1,0 +1,31 @@
+# Виртуальное окружение
+venv/
+ENV/
+env/
+
+# Файлы баз данных
+*.db
+*.sqlite
+*.sqlite3
+
+# Системные файлы macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Временные и тестовые файлы
+test.py
+main.py
+test_physics.db
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Редакторы и IDE
+.vscode/
+.idea/
+*.swp
+*.swo
