@@ -22,15 +22,15 @@ uvicorn app.main:app --reload
 Примеры запросов
 
 Регистрация
-curl -X POST http://localhost:8000/auth/register \
+```curl -X POST http://localhost:8000/auth/register \
   -H "Content-Type: application/json" \
   -d '{"username":"user1","email":"user1@example.com","password":"pass"}'
 Логин (получение токена)
-curl -X POST http://localhost:8000/auth/login \
+```curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/x-www-form-urlencoded" \
   -d "username=user1&password=pass"
 Создание темы (требуется токен, замените <token>)
-curl -X POST http://localhost:8000/topics/ \
+```curl -X POST http://localhost:8000/topics/ \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"name":"Механика","description":"Кинематика, динамика"}'
