@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from app.database import engine, Base
-from app.models import User, Topic, Task
+from app import models
 from app.routers import auth, topics, tasks, recommend
 
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(
+    bind=engine,
+    tables=[models.User.__table__, models.Topic.__table__, models.Task.__table__],
+)
 
 app = FastAPI(title="Physics Task Bank")
 

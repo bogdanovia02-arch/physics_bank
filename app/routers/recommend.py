@@ -1,15 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import and_
-from typing import List
 import random
+from typing import List
+
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
 from app import schemas, models, auth
-from app.database import SessionLocal
+from app.database import get_db
 
 router = APIRouter(prefix="/recommend", tags=["recommend"])
 
 @router.post("/", response_model=List[schemas.TaskOut])
-def recommend_tasks(request: schemas.RecommendRequest, db: Session = Depends(SessionLocal), current_user = Depends(auth.get_current_user)):
+def recommend_tasks(
+    request: schemas.RecommendRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(auth.get_current_user),
+):
     query = db.query(models.Task)
     if request.topic_ids:
         query = query.filter(models.Task.topic_id.in_(request.topic_ids))

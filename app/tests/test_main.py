@@ -1,11 +1,13 @@
+import os
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
+
 from app.main import app
 from app.database import Base, get_db
-from app.models import User, Topic, Task
 
 # Используем отдельный файл для тестов
 TEST_DB = "test_physics.db"
@@ -32,8 +34,13 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
+@pytest.fixture(autouse=True)
+def reset_database():
+    Base.metadata.drop_all(bind=test_engine)
+    Base.metadata.create_all(bind=test_engine)
+    yield
+
 def create_test_user_and_token():
-    import uuid
     unique = str(uuid.uuid4())[:8]
     username = f"user_{unique}"
     email = f"{username}@example.com"
@@ -49,12 +56,20 @@ def create_test_user_and_token():
     token = resp.json()["access_token"]
     return token
 
+def auth_headers():
+    token = create_test_user_and_token()
+    return {"Authorization": f"Bearer {token}"}
+
+def create_topic(headers, name="Механика"):
+    response = client.post("/topics/", json={"name": name, "description": "Раздел физики"}, headers=headers)
+    assert response.status_code == 201, response.json()
+    return response.json()["id"]
+
 def test_root():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json() == {"message": "Physics Task Bank API is running"}
 
-@pytest.mark.skip
 def test_register():
     response = client.post("/auth/register", json={
         "username": "alice",
@@ -72,7 +87,20 @@ def test_register():
     })
     assert response.status_code == 400
 
-@pytest.mark.skip
+def test_register_duplicate_email():
+    response = client.post("/auth/register", json={
+        "username": "alice",
+        "email": "same@example.com",
+        "password": "alicepass"
+    })
+    assert response.status_code == 200
+    response = client.post("/auth/register", json={
+        "username": "bob",
+        "email": "same@example.com",
+        "password": "bobpass"
+    })
+    assert response.status_code == 400
+
 def test_login():
     client.post("/auth/register", json={
         "username": "bob",
@@ -89,10 +117,8 @@ def test_create_topic_unauthorized():
     response = client.post("/topics/", json={"name": "Механика", "description": "test"})
     assert response.status_code == 401
 
-@pytest.mark.skip
 def test_crud_topics():
-    token = create_test_user_and_token()
-    headers = {"Authorization": f"Bearer {token}"}
+    headers = auth_headers()
     response = client.post("/topics/", json={"name": "Термодинамика", "description": "Законы"}, headers=headers)
     assert response.status_code == 201
     topic = response.json()
@@ -104,13 +130,16 @@ def test_crud_topics():
     assert len(topics) == 1
     assert topics[0]["id"] == topic_id
 
-@pytest.mark.skip
+def test_duplicate_topic_rejected():
+    headers = auth_headers()
+    response = client.post("/topics/", json={"name": "Оптика"}, headers=headers)
+    assert response.status_code == 201
+    response = client.post("/topics/", json={"name": "Оптика"}, headers=headers)
+    assert response.status_code == 400
+
 def test_crud_tasks():
-    token = create_test_user_and_token()
-    headers = {"Authorization": f"Bearer {token}"}
-    resp_topic = client.post("/topics/", json={"name": "Оптика"}, headers=headers)
-    assert resp_topic.status_code == 201
-    topic_id = resp_topic.json()["id"]
+    headers = auth_headers()
+    topic_id = create_topic(headers, "Оптика")
     task_data = {
         "question": "Скорость света?",
         "answer": "299792458",
@@ -134,17 +163,36 @@ def test_crud_tasks():
     response = client.get(f"/tasks/{task_id}")
     assert response.status_code == 404
 
-@pytest.mark.skip
+def test_task_validation_rejects_invalid_values():
+    headers = auth_headers()
+    topic_id = create_topic(headers, "Кинематика")
+    response = client.post("/tasks/", json={
+        "question": "v?",
+        "answer": "",
+        "difficulty": 6,
+        "grade": 12,
+        "topic_id": topic_id
+    }, headers=headers)
+    assert response.status_code == 422
+
+def test_create_task_unknown_topic():
+    headers = auth_headers()
+    response = client.post("/tasks/", json={
+        "question": "Найти ускорение тела",
+        "answer": "a = F / m",
+        "difficulty": 2,
+        "grade": 9,
+        "topic_id": 999
+    }, headers=headers)
+    assert response.status_code == 404
+
 def test_recommend():
-    token = create_test_user_and_token()
-    headers = {"Authorization": f"Bearer {token}"}
-    resp_topic = client.post("/topics/", json={"name": "Электричество"}, headers=headers)
-    assert resp_topic.status_code == 201
-    topic_id = resp_topic.json()["id"]
+    headers = auth_headers()
+    topic_id = create_topic(headers, "Электричество")
     tasks = [
-        {"question": "q1", "answer": "a1", "difficulty": 2, "grade": 10, "topic_id": topic_id},
-        {"question": "q2", "answer": "a2", "difficulty": 4, "grade": 11, "topic_id": topic_id},
-        {"question": "q3", "answer": "a3", "difficulty": 3, "grade": 9, "topic_id": topic_id},
+        {"question": "question 1", "answer": "a1", "difficulty": 2, "grade": 10, "topic_id": topic_id},
+        {"question": "question 2", "answer": "a2", "difficulty": 4, "grade": 11, "topic_id": topic_id},
+        {"question": "question 3", "answer": "a3", "difficulty": 3, "grade": 9, "topic_id": topic_id},
     ]
     for t in tasks:
         resp = client.post("/tasks/", json=t, headers=headers)
@@ -163,3 +211,16 @@ def test_recommend():
     assert len(recs) <= 2
     for rec in recs:
         assert rec["topic_id"] == topic_id
+
+def test_recommend_requires_auth():
+    response = client.post("/recommend/", json={"limit": 1})
+    assert response.status_code == 401
+
+def test_recommend_rejects_invalid_range():
+    headers = auth_headers()
+    response = client.post("/recommend/", json={
+        "min_grade": 11,
+        "max_grade": 9,
+        "limit": 1
+    }, headers=headers)
+    assert response.status_code == 422

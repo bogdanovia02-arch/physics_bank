@@ -1,15 +1,15 @@
-from pydantic import BaseModel
 from typing import Optional
 
+from pydantic import BaseModel, ConfigDict, Field
+
 class TopicBase(BaseModel):
-    name: str
-    description: Optional[str] = None
+    name: str = Field(min_length=2, max_length=100)
+    description: Optional[str] = Field(default=None, max_length=500)
 
 class TopicCreate(TopicBase):
     pass
 
 class TopicOut(TopicBase):
-    id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+    id: int
