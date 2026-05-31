@@ -26,6 +26,23 @@ def create_topic(db: Session, topic: schemas.TopicCreate):
     db.refresh(db_topic)
     return db_topic
 
+def update_topic(db: Session, topic_id: int, topic_update: schemas.TopicCreate):
+    db_topic = get_topic(db, topic_id)
+    if db_topic:
+        db_topic.name = topic_update.name
+        db_topic.description = topic_update.description
+        db.commit()
+        db.refresh(db_topic)
+    return db_topic
+
+def delete_topic(db: Session, topic_id: int):
+    db_topic = get_topic(db, topic_id)
+    if db_topic:
+        db.delete(db_topic)
+        db.commit()
+        return True
+    return False
+
 def get_tasks(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Task).offset(skip).limit(limit).all()
 

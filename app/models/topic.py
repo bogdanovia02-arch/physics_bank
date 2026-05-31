@@ -9,4 +9,4 @@ class Topic(Base):
     name = Column(String, unique=True, index=True, nullable=False)
     description = Column(String, nullable=True)
 
-    tasks = relationship("Task", back_populates="topic")
+    tasks = relationship("Task", back_populates="topic", cascade="all, delete-orphan")

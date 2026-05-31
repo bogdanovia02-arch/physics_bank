@@ -65,6 +65,9 @@ uvicorn app.main:app --reload
 | `POST` | `/auth/login` | Получение JWT-токена | нет |
 | `GET` | `/topics/` | Список тем | нет |
 | `POST` | `/topics/` | Создание темы | да |
+| `GET` | `/topics/{topic_id}` | Получение темы | нет |
+| `PUT` | `/topics/{topic_id}` | Обновление темы | да |
+| `DELETE` | `/topics/{topic_id}` | Удаление темы | да |
 | `GET` | `/tasks/` | Список задач | нет |
 | `POST` | `/tasks/` | Создание задачи | да |
 | `GET` | `/tasks/{task_id}` | Получение задачи | нет |

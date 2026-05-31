@@ -129,6 +129,20 @@ def test_crud_topics():
     topics = response.json()
     assert len(topics) == 1
     assert topics[0]["id"] == topic_id
+    response = client.get(f"/topics/{topic_id}")
+    assert response.status_code == 200
+    assert response.json()["name"] == "Термодинамика"
+    response = client.put(
+        f"/topics/{topic_id}",
+        json={"name": "Молекулярная физика", "description": "МКТ"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json()["name"] == "Молекулярная физика"
+    response = client.delete(f"/topics/{topic_id}", headers=headers)
+    assert response.status_code == 204
+    response = client.get(f"/topics/{topic_id}")
+    assert response.status_code == 404
 
 def test_duplicate_topic_rejected():
     headers = auth_headers()
@@ -136,6 +150,19 @@ def test_duplicate_topic_rejected():
     assert response.status_code == 201
     response = client.post("/topics/", json={"name": "Оптика"}, headers=headers)
     assert response.status_code == 400
+
+def test_update_topic_rejects_duplicate_name():
+    headers = auth_headers()
+    first_id = create_topic(headers, "Механика")
+    second_id = create_topic(headers, "Оптика")
+    response = client.put(
+        f"/topics/{second_id}",
+        json={"name": "Механика", "description": "duplicate"},
+        headers=headers,
+    )
+    assert response.status_code == 400
+    response = client.get(f"/topics/{first_id}")
+    assert response.status_code == 200
 
 def test_crud_tasks():
     headers = auth_headers()
